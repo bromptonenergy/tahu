@@ -450,29 +450,33 @@ class SparkplugClient extends events.EventEmitter {
          * 'message' handler
          */
         this.client.on('message', (topic, message) => {
-            let payload = this.maybeDecompressPayload(this.decodePayload(message)),
-                timestamp = payload.timestamp,
-                splitTopic,
-                metrics;
+            try {
+                let payload = this.maybeDecompressPayload(this.decodePayload(message)),
+                    timestamp = payload.timestamp,
+                    splitTopic,
+                    metrics;
 
-            this.messageAlert("arrived", topic, payload);
+                this.messageAlert("arrived", topic, payload);
 
-            // Split the topic up into tokens
-            splitTopic = topic.split("/");
-            if (splitTopic[0] === this.version
-                && splitTopic[1] === this.groupId
-                && splitTopic[2] === "NCMD"
-                && splitTopic[3] === this.edgeNode) {
-                // Emit the "command" event
-                this.emit("ncmd", payload);
-            } else if (splitTopic[0] === this.version
-                && splitTopic[1] === this.groupId
-                && splitTopic[2] === "DCMD"
-                && splitTopic[3] === this.edgeNode) {
-                // Emit the "command" event for the given deviceId
-                this.emit("dcmd", splitTopic[4], payload);
-            } else {
-                this.emit("message", topic, payload);
+                // Split the topic up into tokens
+                splitTopic = topic.split("/");
+                if (splitTopic[0] === this.version
+                    && splitTopic[1] === this.groupId
+                    && splitTopic[2] === "NCMD"
+                    && splitTopic[3] === this.edgeNode) {
+                    // Emit the "command" event
+                    this.emit("ncmd", payload);
+                } else if (splitTopic[0] === this.version
+                    && splitTopic[1] === this.groupId
+                    && splitTopic[2] === "DCMD"
+                    && splitTopic[3] === this.edgeNode) {
+                    // Emit the "command" event for the given deviceId
+                    this.emit("dcmd", splitTopic[4], payload);
+                } else {
+                    this.emit("message", topic, payload);
+                }
+            } catch (err) {
+                logger.info("Error processing incoming message:", err, message.toString());
             }
         });
     }
