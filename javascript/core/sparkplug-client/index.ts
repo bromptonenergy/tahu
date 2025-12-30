@@ -138,7 +138,7 @@ class SparkplugClient extends events.EventEmitter {
             will: {
                 topic: this.version + "/" + this.groupId + "/NDEATH/" + this.edgeNode,
                 payload: Buffer.from(this.encodePayload(this.getDeathPayload())),
-                qos: 0,
+                qos: 1,
                 retain: false,
             },
         };
@@ -171,9 +171,10 @@ class SparkplugClient extends events.EventEmitter {
         return {
             "timestamp": new Date().getTime(),
             "metrics": [{
+                "timestamp": new Date().getTime(),
                 "name": "bdSeq",
                 "value": this.bdSeq,
-                "type": "uint64"
+                "type": "int32"
             }]
         }
     }
