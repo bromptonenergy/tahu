@@ -77,12 +77,15 @@ interface SparkplugClient extends events.EventEmitter {
     on(event: 'dcmd', listener: (device: string, payload: UPayload) => void): this;
     /** emitted when a payload is received with a version unsupported by this client */
     on(event: 'message', listener: (topic: string, payload: UPayload) => void): this;
+    /** emitted when there is an error processing an incoming message */
+    on(event: 'message_error', listener: (topic: string, message: string) => void): this;
 
     emit(event: 'connect' | 'close' | 'reconnect' | 'offline' | 'birth'): boolean;
     emit(event: 'error', error: Error): boolean;
     emit(event: 'ncmd', payload: UPayload): boolean;
     emit(event: 'dcmd', device: string, payload: UPayload): boolean;
     emit(event: 'message', topic: string, payload: UPayload): boolean;
+    emit(event: 'message_error', topic: string, message: string): boolean;
 }
 
 export { UPayload };
@@ -477,6 +480,7 @@ class SparkplugClient extends events.EventEmitter {
                 }
             } catch (err) {
                 logger.info("Error processing incoming message:", err, message.toString());
+                this.emit("message_error", topic, message.toString());
             }
         });
     }
