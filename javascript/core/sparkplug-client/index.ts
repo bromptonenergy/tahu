@@ -405,6 +405,17 @@ class SparkplugClient extends events.EventEmitter {
          * 'error' handler
          */
         this.client.on('error', (error) => {
+
+            if (error.message === "client disconnecting") {
+                try {
+                    this.client!.end();
+                    this.init(); // re-initialize the client to clear out the "client disconnecting" error state and allow for future reconnects
+                } catch (err) {
+                    logger.info("Error disconnecting client after receiving 'client disconnecting' error:", err);
+                }
+                return;
+            }
+
             if (this.connecting) {
                 this.emit("error", error);
                 this.client!.end();
