@@ -407,7 +407,7 @@ class SparkplugClient extends events.EventEmitter {
         this.client.on('error', (error) => {
             if (this.connecting) {
                 this.emit("error", error);
-                this.client!.end();
+                // this.client!.end();
             }
         });
 
